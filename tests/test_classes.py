@@ -941,3 +941,28 @@ def test48_monekypatchable():
 def test49_static_property_override():
     assert t.StaticPropertyOverride.x == 42
     assert t.StaticPropertyOverride2.x == 43
+
+def test50_multiple_inheritance():
+    class Dummy:
+        def __init__(self, value):
+            self.value2 = value
+
+    order = [(t.Struct, Dummy), (Dummy, t.Struct)]
+
+    for o in order:
+        class A(*o):
+            def __init__(self):
+                t.Struct.__init__(self, 123)
+                Dummy.__init__(self, 456)
+
+        a = A()
+        assert a.value() == 123
+        assert a.value2 == 456
+        assert isinstance(a, t.Struct)
+        assert isinstance(a, Dummy)
+
+
+def test51_multiple_inheritance_checks():
+    with pytest.raises(TypeError):
+        class A(t.Struct, t.Foo):
+            pass

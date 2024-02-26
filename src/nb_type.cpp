@@ -454,25 +454,42 @@ static void nb_type_dealloc(PyObject *o) {
 /// Called when a C++ type is extended from within Python
 static int nb_type_init(PyObject *self, PyObject *args, PyObject *kwds) {
     if (NB_TUPLE_GET_SIZE(args) != 3) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "nb_type_init(): invalid number of arguments!");
+        PyErr_SetString(PyExc_RuntimeError, "nb_type_init(): invalid arguments!");
         return -1;
     }
 
     PyObject *bases = NB_TUPLE_GET_ITEM(args, 1);
-    if (!PyTuple_CheckExact(bases) || NB_TUPLE_GET_SIZE(bases) != 1) {
-        PyErr_SetString(PyExc_RuntimeError,
-                        "nb_type_init(): invalid number of bases!");
+    if (!PyTuple_CheckExact(bases)) {
+        PyErr_SetString(PyExc_RuntimeError, "nb_type_init(): invalid arguments!");
         return -1;
     }
 
-    PyObject *base = NB_TUPLE_GET_ITEM(bases, 0);
-    if (!PyType_Check(base)) {
-        PyErr_SetString(PyExc_RuntimeError, "nb_type_init(): expected a base type object!");
+    PyObject *nb_base = nullptr;
+    Py_ssize_t n_bases = NB_TUPLE_GET_SIZE(bases);
+    for (Py_ssize_t i = 0; i < n_bases; ++i) {
+        PyObject *base = NB_TUPLE_GET_ITEM(bases, i);
+        if (!PyType_Check(base)) {
+            PyErr_SetString(PyExc_RuntimeError, "nb_type_init(): base class is not a class");
+            return -1;
+        }
+
+        if (nb_type_check(base)) {
+            if (nb_base != nullptr) {
+                PyErr_SetString(PyExc_TypeError,
+                                "Multiple inheritance from multiple nanobind "
+                                "classes is not permitted!");
+                return -1;
+            }
+            nb_base = base;
+        }
+    }
+
+    if (nb_base == nullptr) {
+        PyErr_SetString(PyExc_RuntimeError, "nb_type_init(): no nanobind base class!");
         return -1;
     }
 
-    type_data *t_b = nb_type_data((PyTypeObject *) base);
+    type_data *t_b = nb_type_data((PyTypeObject *) nb_base);
     if (t_b->flags & (uint32_t) type_flags::is_final) {
         PyErr_Format(PyExc_TypeError, "The type '%s' prohibits subclassing!",
                      t_b->name);
