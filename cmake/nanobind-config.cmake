@@ -111,7 +111,7 @@ endfunction()
 
 function (nanobind_build_library TARGET_NAME)
   cmake_parse_arguments(PARSE_ARGV 1 ARG
-    "AS_SYSINCLUDE" "" "")
+    "AS_SYSINCLUDE;NOSTRIP;NOLTO" "" "")
 
   if (TARGET ${TARGET_NAME})
     return()
@@ -200,9 +200,14 @@ function (nanobind_build_library TARGET_NAME)
     nanobind_link_options(${TARGET_NAME})
     target_compile_definitions(${TARGET_NAME} PRIVATE -DNB_BUILD)
     target_compile_definitions(${TARGET_NAME} PUBLIC -DNB_SHARED)
-    nanobind_lto(${TARGET_NAME})
 
-    nanobind_strip(${TARGET_NAME})
+    if (NOT ${ARG_NOLTO})
+      nanobind_lto(${TARGET_NAME})
+    endif()
+
+    if (NOT ${ARG_NOSTRIP})
+      nanobind_strip(${TARGET_NAME})
+    endif()
   elseif(NOT WIN32 AND NOT APPLE)
     target_compile_options(${TARGET_NAME} PUBLIC $<${NB_OPT_SIZE}:-ffunction-sections -fdata-sections>)
     target_link_options(${TARGET_NAME} PUBLIC $<${NB_OPT_SIZE}:-Wl,--gc-sections>)
