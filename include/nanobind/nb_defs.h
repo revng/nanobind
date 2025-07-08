@@ -40,11 +40,7 @@
 #  endif
 #endif
 
-#if defined(__GNUC__) && !defined(_WIN32)
-#  define NB_NAMESPACE nanobind __attribute__((visibility("hidden")))
-#else
-#  define NB_NAMESPACE nanobind
-#endif
+#define NB_NAMESPACE nanobind
 
 #if defined(__GNUC__)
 #  define NB_UNLIKELY(x) __builtin_expect(bool(x), 0)
