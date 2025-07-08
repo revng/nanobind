@@ -32,9 +32,9 @@
 #include <exception>
 #include <stdexcept>
 #include <type_traits>
-#include <typeinfo>
 #include <utility>
 #include <new>
+#include "typeinfo_shim.h"
 
 // Implementation. The nb_*.h files should only be included through nanobind.h
 // IWYU pragma: begin_exports
