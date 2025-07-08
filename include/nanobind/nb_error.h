@@ -7,6 +7,8 @@
     BSD-style license that can be found in the LICENSE file.
 */
 
+#include <map>
+
 NAMESPACE_BEGIN(NB_NAMESPACE)
 
 /// RAII wrapper that temporarily clears any Python error state
@@ -102,11 +104,21 @@ public:
     NB_EXPORT_SHARED builtin_exception(const builtin_exception &) = default;
     NB_EXPORT_SHARED ~builtin_exception();
     NB_EXPORT_SHARED exception_type type() const { return m_type; }
+    virtual const char *what() const override { return m_what.c_str(); }
 private:
     exception_type m_type;
+    std::string m_what;
+};
+
+inline std::map<exception_type, const char *> exception_type_str;
+struct RegisterExceptionTypeStr {
+    RegisterExceptionTypeStr(exception_type type, const char *name) {
+        exception_type_str[type] = name;
+    }
 };
 
 #define NB_EXCEPTION(name)                                                     \
+    inline RegisterExceptionTypeStr _reg_ ## name(exception_type::name, #name);\
     inline builtin_exception name(const char *what = nullptr) {                \
         return builtin_exception(exception_type::name, what);                  \
     }
@@ -137,6 +149,7 @@ class exception : public object {
                  detail::steal_t()) {
         detail::register_exception_translator(
             [](const std::exception_ptr &p, void *payload) {
+                abort();
                 try {
                     std::rethrow_exception(p);
                 } catch (T &e) {
