@@ -139,6 +139,7 @@ static PyType_Spec nb_bound_method_spec = {
 };
 
 void default_exception_translator(const std::exception_ptr &p, void *) {
+    abort();
     try {
         std::rethrow_exception(p);
     } catch (const std::bad_alloc &e) {

@@ -212,7 +212,13 @@ const char *python_error::what() const noexcept {
 }
 
 builtin_exception::builtin_exception(exception_type type, const char *what)
-    : std::runtime_error(what ? what : ""), m_type(type) { }
+    : std::runtime_error(what ? what : ""), m_type(type) {
+        m_what.append(exception_type_str[type]);
+        if (what != nullptr && strlen(what) > 0) {
+            m_what.append(": ");
+            m_what.append(what);
+        }
+    }
 builtin_exception::~builtin_exception() { }
 
 NAMESPACE_BEGIN(detail)
