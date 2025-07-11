@@ -250,12 +250,8 @@ PyObject *nb_func_new(const void *in_) noexcept {
                    instead, hide the parent's overloads in this case */
                 if (fp->scope != f->scope)
                     Py_CLEAR(func_prev);
-            } else if (name_cstr[0] == '_') {
-                Py_CLEAR(func_prev);
             } else {
-                check(false,
-                      "nb::detail::nb_func_new(\"%s\"): cannot overload "
-                      "existing non-function object of the same name!", name_cstr);
+                Py_CLEAR(func_prev);
             }
         } else {
             PyErr_Clear();
