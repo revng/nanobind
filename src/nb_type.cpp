@@ -725,10 +725,10 @@ void *type_get_slot(PyTypeObject *t, int slot_id) {
 #endif
 
 static PyObject *nb_type_from_metaclass(PyTypeObject *meta, PyObject *mod,
-                                        PyType_Spec *spec) {
+                                        PyType_Spec *spec, PyObject *bases = nullptr) {
 #if NB_TYPE_FROM_METACLASS_IMPL == 0
     // Life is good, PyType_FromMetaclass() is available
-    return PyType_FromMetaclass(meta, mod, spec, nullptr);
+    return PyType_FromMetaclass(meta, mod, spec, bases);
 #else
     /* The fallback code below emulates PyType_FromMetaclass() on Python prior
        to version 3.12. It requires access to CPython-internal structures, which
@@ -1066,6 +1066,41 @@ static PyObject *nb_type_vectorcall(PyObject *self, PyObject *const *args_in,
     }
 }
 
+/// Call __init__subclass__ of the parent class. This function assumes that the
+/// passed type object has a parent class.
+/// Copied and adapted from the following function in CPython
+/// https://github.com/python/cpython/blob/89c220b93c06059f623e2d232bd54f49be1be22d/Objects/typeobject.c#L11848
+static void call_init_subclass(PyObject *type) {
+    // Call super(type, type) which returns a proxy for the parent class
+    PyObject *super_args[2] = {type, type};
+    PyObject *super = PyObject_Vectorcall((PyObject *)&PySuper_Type, super_args, 2, NULL);
+
+    // Try and get the `__init_subclass__` function from the base class
+    PyObject *func = PyObject_GetAttrString(super, "__init_subclass__");
+    Py_DECREF(super);
+    if (func == NULL)
+        return;
+
+    // The base class might be written in C and not implement the vectorcall
+    // protocol. Use the PyObject_Call which is guaranteed to always work.
+    // This calls the base class __init_subclass__ with empty args and kwargs.
+    PyObject *args = PyTuple_New(0);
+    PyObject *kwargs = PyDict_New();
+    assert(args != NULL);
+    assert(kwargs != NULL);
+
+    PyObject *result = PyObject_Call(func, args, kwargs);
+    Py_DECREF(func);
+    Py_DECREF(args);
+    Py_DECREF(kwargs);
+    if (result == NULL) {
+        PyErr_Print();
+        abort();
+    }
+
+    Py_DECREF(result);
+}
+
 /// Called when a C++ type is bound via nb::class_<>
 PyObject *nb_type_new(const type_init_data *t) noexcept {
     bool has_doc               = t->flags & (uint32_t) type_init_flags::has_doc,
@@ -1154,10 +1189,6 @@ PyObject *nb_type_new(const type_init_data *t) noexcept {
             generic_base = true;
         }
         #endif
-
-        check(nb_type_check(base),
-              "nanobind::detail::nb_type_new(\"%s\"): base type is not a "
-              "nanobind type!", t_name);
     } else if (has_base) {
         lock_internals guard(internals_);
         nb_type_map_slow::iterator it2 = internals_->type_c2p_slow.find(t->base);
@@ -1168,7 +1199,7 @@ PyObject *nb_type_new(const type_init_data *t) noexcept {
     }
 
     type_data *tb = nullptr;
-    if (base) {
+    if (base != nullptr && nb_type_check(base)) {
         // Check if the base type already has dynamic attributes
         tb = nb_type_data((PyTypeObject *) base);
         if (tb->flags & (uint32_t) type_flags::has_dynamic_attr)
@@ -1335,7 +1366,7 @@ PyObject *nb_type_new(const type_init_data *t) noexcept {
 
     PyTypeObject *metaclass = nb_type_tp(has_supplement ? t->supplement : 0);
 
-    PyObject *result = nb_type_from_metaclass(metaclass, mod, &spec);
+    PyObject *result = nb_type_from_metaclass(metaclass, mod, &spec, base);
     if (!result) {
         python_error err;
         check(false,
@@ -1407,6 +1438,10 @@ PyObject *nb_type_new(const type_init_data *t) noexcept {
     if (has_signature) {
         setattr(result, "__nb_signature__", str(t->name));
         free((char *) t_name);
+    }
+
+    if (base != nullptr) {
+        call_init_subclass(result);
     }
 
 #if PY_VERSION_HEX >= 0x03090000
