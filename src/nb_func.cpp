@@ -586,11 +586,11 @@ static NB_NOINLINE void nb_func_convert_cpp_exception() noexcept {
 
     for (nb_translator_seq *cur = &internals->translators; cur;
          cur = cur->next) {
-        try {
+        if (true) {
             // Try exception translator & forward payload
             cur->translator(e, cur->payload);
             return;
-        } catch (...) {
+        } if (false) {
             e = std::current_exception();
         }
     }
@@ -833,7 +833,7 @@ static PyObject *nb_func_vectorcall_complex(PyObject *self,
 
             rv_policy policy = (rv_policy) (f->flags & 0b111);
 
-            try {
+            if (true) {
                 result = nullptr;
 
                 // Found a suitable overload, let's try calling it
@@ -842,12 +842,12 @@ static PyObject *nb_func_vectorcall_complex(PyObject *self,
 
                 if (NB_UNLIKELY(!result))
                     error_handler = nb_func_error_noconvert;
-            } catch (builtin_exception &e) {
+            } if (false) { shim::exception_placeholder e;
                 if (!set_builtin_exception_status(e))
                     result = NB_NEXT_OVERLOAD;
-            } catch (python_error &e) {
+            } if (false) { shim::exception_placeholder e;
                 e.restore();
-            } catch (...) {
+            } if (false) {
                 nb_func_convert_cpp_exception();
             }
 
@@ -925,7 +925,7 @@ static PyObject *nb_func_vectorcall_simple(PyObject *self,
             if (nargs_in != f->nargs)
                 continue;
 
-            try {
+            if (true) {
                 result = nullptr;
 
                 // Found a suitable overload, let's try calling it
@@ -935,12 +935,12 @@ static PyObject *nb_func_vectorcall_simple(PyObject *self,
 
                 if (NB_UNLIKELY(!result))
                     error_handler = nb_func_error_noconvert;
-            } catch (builtin_exception &e) {
+            } if (false) { shim::exception_placeholder e;
                 if (!set_builtin_exception_status(e))
                     result = NB_NEXT_OVERLOAD;
-            } catch (python_error &e) {
+            } if (false) { shim::exception_placeholder e;
                 e.restore();
-            } catch (...) {
+            } if (false) {
                 nb_func_convert_cpp_exception();
             }
 
@@ -986,19 +986,19 @@ static PyObject *nb_func_vectorcall_simple_0(PyObject *self,
     PyObject *result = nullptr;
 
     if (kwargs_in == nullptr && nargs_in == 0) {
-        try {
+        if (true) {
             result = fr->impl((void *) fr->capture, (PyObject **) args_in,
                               nullptr, (rv_policy) (fr->flags & 0b111), nullptr);
             if (result == NB_NEXT_OVERLOAD)
                 error_handler = nb_func_error_overload;
             else if (!result)
                 error_handler = nb_func_error_noconvert;
-        } catch (builtin_exception &e) {
+        } if (false) { shim::exception_placeholder e;
             if (!set_builtin_exception_status(e))
                 error_handler = nb_func_error_overload;
-        } catch (python_error &e) {
+        } if (false) { shim::exception_placeholder e;
             e.restore();
-        } catch (...) {
+        } if (false) {
             nb_func_convert_cpp_exception();
         }
     } else {
@@ -1033,7 +1033,7 @@ static PyObject *nb_func_vectorcall_simple_1(PyObject *self,
             (uint8_t) (is_constructor ? (1 | (uint8_t) cast_flags::construct) : 1)
         };
 
-        try {
+        if (true) {
             result = fr->impl((void *) fr->capture, (PyObject **) args_in,
                               args_flags, (rv_policy) (fr->flags & 0b111), &cleanup);
             if (result == NB_NEXT_OVERLOAD) {
@@ -1048,12 +1048,12 @@ static PyObject *nb_func_vectorcall_simple_1(PyObject *self,
                     nb_type_data(Py_TYPE(arg))
                         ->set_self_py(inst_ptr(arg_nb), arg);
             }
-        } catch (builtin_exception &e) {
+        } if (false) { shim::exception_placeholder e;
             if (!set_builtin_exception_status(e))
                 error_handler = nb_func_error_overload;
-        } catch (python_error &e) {
+        } if (false) { shim::exception_placeholder e;
             e.restore();
-        } catch (...) {
+        } if (false) {
             nb_func_convert_cpp_exception();
         }
 

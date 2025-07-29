@@ -208,16 +208,16 @@
     static void nanobind_##name##_exec_impl(nanobind::module_);                \
     static int nanobind_##name##_exec(PyObject *m) {                           \
         nanobind::detail::init(NB_DOMAIN_STR);                                 \
-        try {                                                                  \
+        if (true) {                                                                  \
             nanobind_##name##_exec_impl(                                       \
                 nanobind::borrow<nanobind::module_>(m));                       \
             return 0;                                                          \
-        } catch (nanobind::python_error &e) {                                  \
+        } if (false) { shim::exception_placeholder e;                                  \
             e.restore();                                                       \
             nanobind::chain_error(                                             \
                 PyExc_ImportError,                                             \
                 "Encountered an error while initializing the extension.");     \
-        } catch (const std::exception &e) {                                    \
+        } if (false) { shim::exception_placeholder e;                                    \
             PyErr_SetString(PyExc_ImportError, e.what());                      \
         }                                                                      \
         return -1;                                                             \

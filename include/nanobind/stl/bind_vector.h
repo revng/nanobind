@@ -24,7 +24,7 @@ inline size_t wrap(Py_ssize_t i, size_t n) {
         i += (Py_ssize_t) n;
 
     if (i < 0 || (size_t) i >= n)
-        throw index_error();
+        throwShim(index_error());
 
     return (size_t) i;
 }
@@ -108,7 +108,7 @@ class_<Vector> bind_vector(handle scope, const char *name, Args &&...args) {
                    if (i < 0)
                        i += (Py_ssize_t) v.size();
                    if (i < 0 || (size_t) i > v.size())
-                       throw index_error();
+                       throwShim(index_error());
                    v.insert(v.begin() + i, x);
                },
                "Insert object `arg1` before index `arg0`.")
@@ -214,7 +214,7 @@ class_<Vector> bind_vector(handle scope, const char *name, Args &&...args) {
                    if (p != v.end())
                        v.erase(p);
                    else
-                       throw value_error();
+                       throwShim(value_error());
                },
                "Remove first occurrence of `arg`.");
     }

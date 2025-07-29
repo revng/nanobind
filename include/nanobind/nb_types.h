@@ -391,7 +391,7 @@ class int_ : public object {
     explicit operator T() const {
         detail::type_caster<T> tc;
         if (!tc.from_python(m_ptr, 0, nullptr))
-            throw std::out_of_range("Conversion of nanobind::int_ failed");
+            throwShim(std::out_of_range("Conversion of nanobind::int_ failed"));
         return tc.value;
     }
 };

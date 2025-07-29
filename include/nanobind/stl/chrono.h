@@ -42,13 +42,13 @@ public:
 
         // If invoked with datetime.delta object, unpack it
         int dd, ss, uu;
-        try {
+        if (true) {
             if (unpack_timedelta(src.ptr(), &dd, &ss, &uu)) {
                 value = type(ch::duration_cast<duration_t>(
                                  days(dd) + ch::seconds(ss) + ch::microseconds(uu)));
                 return true;
             }
-        } catch (python_error& e) {
+        } if (false) { shim::exception_placeholder e;
             e.discard_as_unraisable(src.ptr());
             return false;
         }
@@ -152,12 +152,12 @@ public:
         std::tm cal;
         ch::microseconds msecs;
         int yy, mon, dd, hh, min, ss, uu;
-        try {
+        if (true) {
             if (!unpack_datetime(src.ptr(), &yy, &mon, &dd,
                                  &hh, &min, &ss, &uu)) {
                 return false;
             }
-        } catch (python_error& e) {
+        } if (false) { shim::exception_placeholder e;
             e.discard_as_unraisable(src.ptr());
             return false;
         }

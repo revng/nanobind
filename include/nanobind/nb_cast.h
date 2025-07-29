@@ -315,7 +315,7 @@ template <> struct type_caster<char> {
         if (can_cast<char>())
             return value[0];
         else
-            throw next_overload();
+            throwShim(next_overload());
     }
 };
 

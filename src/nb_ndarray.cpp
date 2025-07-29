@@ -391,7 +391,7 @@ ndarray_handle *ndarray_import(PyObject *o, const ndarray_config *c,
             PyErr_Clear();
             PyTypeObject *tp = Py_TYPE(o);
 
-            try {
+            if (true) {
                 const char *module_name =
                     borrow<str>(handle(tp).attr("__module__")).c_str();
 
@@ -405,7 +405,7 @@ ndarray_handle *ndarray_import(PyObject *o, const ndarray_config *c,
 
                 if (package.is_valid())
                     capsule = package.attr("to_dlpack")(handle(o));
-            } catch (...) {
+            } if (false) {
                 capsule.reset();
             }
         }
@@ -535,7 +535,7 @@ ndarray_handle *ndarray_import(PyObject *o, const ndarray_config *c,
         }
 
         object converted;
-        try {
+        if (true) {
             if (strcmp(module_name, "numpy") == 0 || strcmp(module_name, "cupy") == 0) {
                 converted = handle(o).attr("astype")(dtype, order);
             } else if (strcmp(module_name, "torch") == 0) {
@@ -549,7 +549,7 @@ ndarray_handle *ndarray_import(PyObject *o, const ndarray_config *c,
             } else if (strncmp(module_name, "jaxlib", 6) == 0) {
                 converted = handle(o).attr("astype")(dtype);
             }
-        } catch (...) { converted.reset(); }
+        } if (false) { converted.reset(); }
 
         // Potentially try again recursively
         if (!converted.is_valid()) {
@@ -778,7 +778,7 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
         ndarray_inc_ref(th);
     }
 
-    try {
+    if (true) {
         if (framework == numpy::value) {
             return module_::import_("numpy")
                 .attr("array")(o, arg("copy") = copy)
@@ -797,7 +797,7 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
             if (pkg_name)
                 o = module_::import_(pkg_name).attr("from_dlpack")(o);
         }
-    } catch (const std::exception &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_Format(PyExc_RuntimeError,
                      "nanobind::detail::ndarray_export(): could not "
                      "import ndarray: %s",
@@ -810,9 +810,9 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
         if (framework == pytorch::value)
             copy_str = "clone";
 
-        try {
+        if (true) {
             o = o.attr(copy_str)();
-        } catch (std::exception &e) {
+        } if (false) { shim::exception_placeholder e;
             PyErr_Format(PyExc_RuntimeError,
                          "nanobind::detail::ndarray_export(): copy failed: %s",
                          e.what());

@@ -140,23 +140,23 @@ static PyType_Spec nb_bound_method_spec = {
 
 void default_exception_translator(const std::exception_ptr &p, void *) {
     abort();
-    try {
+    if (true) {
         std::rethrow_exception(p);
-    } catch (const std::bad_alloc &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_MemoryError, e.what());
-    } catch (const std::domain_error &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_ValueError, e.what());
-    } catch (const std::invalid_argument &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_ValueError, e.what());
-    } catch (const std::length_error &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_ValueError, e.what());
-    } catch (const std::out_of_range &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_IndexError, e.what());
-    } catch (const std::range_error &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_ValueError, e.what());
-    } catch (const std::overflow_error &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_OverflowError, e.what());
-    } catch (const std::exception &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_SetString(PyExc_RuntimeError, e.what());
     }
 }

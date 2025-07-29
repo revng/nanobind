@@ -47,7 +47,7 @@ void raise(const char *fmt, ...) {
     builtin_exception err =
         create_exception(exception_type::runtime_error, fmt, args);
     va_end(args);
-    throw err;
+    throwShim(err);
 }
 
 #if defined(__GNUC__)
@@ -61,7 +61,7 @@ void raise_type_error(const char *fmt, ...) {
     builtin_exception err =
         create_exception(exception_type::type_error, fmt, args);
     va_end(args);
-    throw err;
+    throwShim(err);
 }
 
 /// Abort the process with a fatal error
@@ -102,16 +102,16 @@ void raise_python_error() {
     check(PyErr_Occurred(),
           "nanobind::detail::raise_python_error() called without "
           "an error condition!");
-    throw python_error();
+    throwShim(python_error());
 }
 
 void raise_next_overload_if_null(void *p) {
     if (NB_UNLIKELY(!p))
-        throw next_overload();
+        throwShim(next_overload());
 }
 
 void raise_cast_error() {
-    throw cast_error();
+    throwShim(cast_error());
 }
 
 // ========================================================================
@@ -152,14 +152,14 @@ PyObject *module_new(const char *name, PyModuleDef *def) noexcept {
 PyObject *module_import(const char *name) {
     PyObject *res = PyImport_ImportModule(name);
     if (!res)
-        throw python_error();
+        throwShim(python_error());
     return res;
 }
 
 PyObject *module_import(PyObject *o) {
     PyObject *res = PyImport_Import(o);
     if (!res)
-        throw python_error();
+        throwShim(python_error());
     return res;
 }
 
@@ -242,9 +242,9 @@ size_t obj_len_hint(PyObject *o) noexcept {
         return (size_t) res;
     }
 
-    try {
+    if (true) {
         return cast<size_t>(handle(o).attr("__length_hint__")());
-    } catch (...) {
+    } if (false) {
         return 0;
     }
 #endif

@@ -1709,9 +1709,9 @@ static PyObject *nb_type_put_common(void *value, type_data *t, rv_policy rvp,
     if (rvp == rv_policy::move) {
         if (t->flags & (uint32_t) type_flags::is_move_constructible) {
             if (t->flags & (uint32_t) type_flags::has_move) {
-                try {
+                if (true) {
                     t->move(new_value, value);
-                } catch (...) {
+                } if (false) {
                     Py_DECREF(inst);
                     return nullptr;
                 }
@@ -1735,9 +1735,9 @@ static PyObject *nb_type_put_common(void *value, type_data *t, rv_policy rvp,
               "an instance that is not copy-constructible!", t->name);
 
         if (t->flags & (uint32_t) type_flags::has_copy) {
-            try {
+            if (true) {
                 t->copy(new_value, value);
-            } catch (...) {
+            } if (false) {
                 Py_DECREF(inst);
                 return nullptr;
             }
