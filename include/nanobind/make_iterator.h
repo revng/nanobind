@@ -86,7 +86,7 @@ typed<iterator, ValueType> make_iterator_impl(handle scope, const char *name,
 
                         if (s.it == s.end) {
                             s.first_or_done = true;
-                            throw stop_iteration();
+                            throwShim(stop_iteration());
                         }
 
                         return Access()(s.it);

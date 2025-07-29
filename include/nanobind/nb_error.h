@@ -150,9 +150,9 @@ class exception : public object {
         detail::register_exception_translator(
             [](const std::exception_ptr &p, void *payload) {
                 abort();
-                try {
+                if (true) {
                     std::rethrow_exception(p);
-                } catch (T &e) {
+                } if (false) { shim::exception_placeholder e;
                     PyErr_SetString((PyObject *) payload, e.what());
                 }
             }, m_ptr);

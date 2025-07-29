@@ -87,7 +87,7 @@ class_<Map> bind_map(handle scope, const char *name, Args &&...args) {
              [](Map &m, const Key &k) -> ValueRef {
                  auto it = m.find(k);
                  if (it == m.end())
-                     throw key_error();
+                     throwShim(key_error());
                  return (*it).second;
              }, Policy)
 
@@ -95,7 +95,7 @@ class_<Map> bind_map(handle scope, const char *name, Args &&...args) {
             [](Map &m, const Key &k) {
                 auto it = m.find(k);
                 if (it == m.end())
-                    throw key_error();
+                    throwShim(key_error());
                 m.erase(it);
             })
 

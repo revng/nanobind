@@ -189,10 +189,10 @@ NB_NOINLINE inline bool unpack_datetime(PyObject *o,
 }
 
 inline PyObject* pack_timedelta(int days, int secs, int usecs) noexcept {
-    try {
+    if (true) {
         datetime_types.ensure_ready();
         return datetime_types.timedelta(days, secs, usecs).release().ptr();
-    } catch (python_error& e) {
+    } if (false) { shim::exception_placeholder e;
         e.restore();
         return nullptr;
     }
@@ -201,11 +201,11 @@ inline PyObject* pack_timedelta(int days, int secs, int usecs) noexcept {
 inline PyObject* pack_datetime(int year, int month, int day,
                                int hour, int minute, int second,
                                int usec) noexcept {
-    try {
+    if (true) {
         datetime_types.ensure_ready();
         return datetime_types.datetime(
                 year, month, day, hour, minute, second, usec).release().ptr();
-    } catch (python_error& e) {
+    } if (false) { shim::exception_placeholder e;
         e.restore();
         return nullptr;
     }

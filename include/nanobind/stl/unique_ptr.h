@@ -160,7 +160,7 @@ struct type_caster<std::unique_ptr<T, Deleter>> {
     explicit operator Value() {
         if (!inflight && !src.is_none() &&
             !nb_type_relinquish_ownership(src.ptr(), IsDefaultDeleter))
-            throw next_overload();
+            throwShim(next_overload());
 
         Td *p = caster.operator Td *();
 

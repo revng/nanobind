@@ -416,7 +416,7 @@ namespace detail {
                 cpp_function_def(
                     [](handle type) {
                         if (!type_check(type))
-                            throw cast_error();
+                            throwShim(cast_error());
                         return inst_alloc(type);
                     },
                     scope(cls), name("__new__"));

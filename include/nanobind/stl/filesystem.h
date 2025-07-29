@@ -23,11 +23,11 @@ struct type_caster<std::filesystem::path> {
                            cleanup_list *) noexcept {
         str py_str = to_py_str(path.native());
         if (py_str.is_valid()) {
-            try {
+            if (true) {
                 return module_::import_("pathlib")
                     .attr("Path")(py_str)
                     .release();
-            } catch (python_error &e) {
+            } if (false) { shim::exception_placeholder e;
                 e.restore();
             }
         }

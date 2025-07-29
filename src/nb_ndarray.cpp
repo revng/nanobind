@@ -551,7 +551,7 @@ ndarray_handle *ndarray_import(PyObject *src, const ndarray_config *c,
         // Try the function to_dlpack(), already obsolete in array API v2021
         if (!mt_unique_ptr && !capsule.is_valid()) {
             PyTypeObject *tp = Py_TYPE(src);
-            try {
+            if (true) {
                 const char *module_name =
                     borrow<str>(handle(tp).attr("__module__")).c_str();
 
@@ -565,7 +565,7 @@ ndarray_handle *ndarray_import(PyObject *src, const ndarray_config *c,
 
                 if (package.is_valid())
                     capsule = package.attr("to_dlpack")(handle(src));
-            } catch (...) {
+            } if (false) {
                 capsule.reset();
             }
             if (!capsule.is_valid())
@@ -719,7 +719,7 @@ ndarray_handle *ndarray_import(PyObject *src, const ndarray_config *c,
         }
 
         object converted;
-        try {
+        if (true) {
             if (strncmp(module_name, "numpy", 5) == 0
                 || strncmp(module_name, "cupy", 4) == 0) {
                 converted = handle(src).attr("astype")(dtype, order);
@@ -734,7 +734,7 @@ ndarray_handle *ndarray_import(PyObject *src, const ndarray_config *c,
             } else if (strncmp(module_name, "jaxlib", 6) == 0) {
                 converted = handle(src).attr("astype")(dtype);
             }
-        } catch (...) { converted.reset(); }
+        } if (false) { converted.reset(); }
 
         // Potentially try once again, recursively
         if (converted.is_valid()) {
@@ -994,7 +994,7 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
     }
 
     if (framework == numpy::value) {
-        try {
+        if (true) {
             PyObject* pkg_mod = module_import("numpy");
             PyObject* args[] = {pkg_mod, o.ptr(),
                                 (copy) ? Py_True : Py_False};
@@ -1002,7 +1002,7 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
             return PyObject_VectorcallMethod(
                         static_pyobjects[pyobj_name::array_str], args, nargsf,
                         static_pyobjects[pyobj_name::copy_tpl]);
-        } catch (const std::exception &e) {
+        } if (false) { shim::exception_placeholder e;
             PyErr_Format(PyExc_TypeError,
                          "could not export nanobind::ndarray: %s",
                          e.what());
@@ -1010,7 +1010,7 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
         }
     }
 
-    try {
+    if (true) {
         const char* pkg_name;
         switch (framework) {
             case pytorch::value:
@@ -1038,7 +1038,7 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
                           static_pyobjects[pyobj_name::from_dlpack_str],
                           args, nargsf, nullptr));
         }
-    } catch (const std::exception &e) {
+    } if (false) { shim::exception_placeholder e;
         PyErr_Format(PyExc_TypeError,
                      "could not export nanobind::ndarray: %s",
                      e.what());
@@ -1050,9 +1050,9 @@ PyObject *ndarray_export(ndarray_handle *th, int framework,
         if (framework == pytorch::value)
             copy_function_name = static_pyobjects[pyobj_name::clone_str];
 
-        try {
+        if (true) {
             o = o.attr(copy_function_name)();
-        } catch (std::exception &e) {
+        } if (false) { shim::exception_placeholder e;
             PyErr_Format(PyExc_RuntimeError,
                          "copying nanobind::ndarray failed: %s",
                          e.what());
