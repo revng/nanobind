@@ -412,10 +412,10 @@ PyObject *nb_func_new(const void *in_) noexcept {
 
     for (size_t i = 0;; ++i) {
         if (!f->descr_types[i]) {
-            fc->descr_types = (const std::type_info **)
-                malloc_check(sizeof(const std::type_info *) * (i + 1));
+            fc->descr_types = (const shim::type_info **)
+                malloc_check(sizeof(const shim::type_info *) * (i + 1));
             memcpy(fc->descr_types, f->descr_types,
-                        (i + 1) * sizeof(const std::type_info *));
+                        (i + 1) * sizeof(const shim::type_info *));
             break;
         }
     }
@@ -1159,7 +1159,7 @@ static uint32_t nb_func_render_signature(const func_data *f,
     if (nb_signature_mode)
         buf.put("def ");
 
-    const std::type_info **descr_type = f->descr_types;
+    const shim::type_info **descr_type = f->descr_types;
     bool rv = false;
 
     uint32_t arg_index = 0, n_default_args = 0;
@@ -1559,7 +1559,7 @@ static void strexc(char *s, const char *sub) {
 }
 
 /// Return a readable string representation of a C++ type
-NB_NOINLINE char *type_name(const std::type_info *t) {
+NB_NOINLINE char *type_name(const shim::type_info *t) {
     const char *name_in = t->name();
 
 #if defined(__GNUG__)

@@ -178,8 +178,8 @@ NB_INLINE PyObject *func_create(Func &&func, Return (*)(Args...),
             make_caster<remove_opt_mono_t<intrinsic_t<Args>>>::Name)...) +
         const_name(") -> ") + cast_out::Name;
 
-    // std::type_info for all function arguments
-    const std::type_info* descr_types[descr.type_count() + 1];
+    // shim::type_info for all function arguments
+    const shim::type_info* descr_types[descr.type_count() + 1];
     descr.put_types(descr_types);
 
     // Auxiliary data structure to capture the provided function/closure

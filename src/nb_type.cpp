@@ -348,7 +348,7 @@ static void inst_dealloc(PyObject *self) {
 
 
 type_data *nb_type_c2p(nb_internals *internals_,
-                       const std::type_info *type) {
+                       const shim::type_info *type) {
 #if defined(NB_FREE_THREADED)
     thread_local nb_type_map_fast type_c2p_fast;
 #else
@@ -1090,7 +1090,7 @@ PyObject *nb_type_new(const type_init_data *t) noexcept {
     object modname;
     PyObject *mod = nullptr;
 
-    // Update hash table that maps from std::type_info to Python type
+    // Update hash table that maps from shim::type_info to Python type
     nb_type_map_slow::iterator it;
     bool success;
     nb_internals *internals_ = internals;
@@ -1438,13 +1438,13 @@ PyObject *call_one_arg(PyObject *fn, PyObject *arg) noexcept {
 
 /// Encapsulates the implicit conversion part of nb_type_get()
 static NB_NOINLINE bool nb_type_get_implicit(PyObject *src,
-                                             const std::type_info *cpp_type_src,
+                                             const shim::type_info *cpp_type_src,
                                              const type_data *dst_type,
                                              nb_internals *internals_,
                                              cleanup_list *cleanup, void **out) noexcept {
     if (dst_type->implicit.cpp && cpp_type_src) {
-        const std::type_info **it = dst_type->implicit.cpp;
-        const std::type_info *v;
+        const shim::type_info **it = dst_type->implicit.cpp;
+        const shim::type_info *v;
 
         while ((v = *it++)) {
             if (v == cpp_type_src || *v == *cpp_type_src)
@@ -1504,7 +1504,7 @@ found:
 }
 
 // Attempt to retrieve a pointer to a C++ instance
-bool nb_type_get(const std::type_info *cpp_type, PyObject *src, uint8_t flags,
+bool nb_type_get(const shim::type_info *cpp_type, PyObject *src, uint8_t flags,
                  cleanup_list *cleanup, void **out) noexcept {
     // Convert None -> nullptr
     if (src == Py_None) {
@@ -1513,7 +1513,7 @@ bool nb_type_get(const std::type_info *cpp_type, PyObject *src, uint8_t flags,
     }
 
     PyTypeObject *src_type = Py_TYPE(src);
-    const std::type_info *cpp_type_src = nullptr;
+    const shim::type_info *cpp_type_src = nullptr;
     const bool src_is_nb_type = nb_type_check((PyObject *) src_type);
 
     type_data *dst_type = nullptr;
@@ -1774,7 +1774,7 @@ static PyObject *nb_type_put_common(void *value, type_data *t, rv_policy rvp,
     return (PyObject *) inst;
 }
 
-PyObject *nb_type_put(const std::type_info *cpp_type,
+PyObject *nb_type_put(const shim::type_info *cpp_type,
                       void *value, rv_policy rvp,
                       cleanup_list *cleanup,
                       bool *is_new) noexcept {
@@ -1849,8 +1849,8 @@ PyObject *nb_type_put(const std::type_info *cpp_type,
     return nb_type_put_common(value, td, rvp, cleanup, is_new);
 }
 
-PyObject *nb_type_put_p(const std::type_info *cpp_type,
-                        const std::type_info *cpp_type_p,
+PyObject *nb_type_put_p(const shim::type_info *cpp_type,
+                        const shim::type_info *cpp_type_p,
                         void *value, rv_policy rvp,
                         cleanup_list *cleanup,
                         bool *is_new) noexcept {
@@ -1903,7 +1903,7 @@ PyObject *nb_type_put_p(const std::type_info *cpp_type,
             while (true) {
                 PyTypeObject *tp = Py_TYPE(seq.inst);
 
-                const std::type_info *p = nb_type_data(tp)->type;
+                const shim::type_info *p = nb_type_data(tp)->type;
 
                 if (p == cpp_type || p == cpp_type_p) {
                     if (nb_try_inc_ref(seq.inst))
@@ -1937,7 +1937,7 @@ PyObject *nb_type_put_p(const std::type_info *cpp_type,
 }
 
 static void nb_type_put_unique_finalize(PyObject *o,
-                                        const std::type_info *cpp_type,
+                                        const shim::type_info *cpp_type,
                                         bool cpp_delete, bool is_new) {
     (void) cpp_type;
     check(cpp_delete || !is_new,
@@ -1968,7 +1968,7 @@ static void nb_type_put_unique_finalize(PyObject *o,
     }
 }
 
-PyObject *nb_type_put_unique(const std::type_info *cpp_type,
+PyObject *nb_type_put_unique(const shim::type_info *cpp_type,
                              void *value,
                              cleanup_list *cleanup, bool cpp_delete) noexcept {
     rv_policy policy = cpp_delete ? rv_policy::take_ownership : rv_policy::none;
@@ -1982,8 +1982,8 @@ PyObject *nb_type_put_unique(const std::type_info *cpp_type,
     return o;
 }
 
-PyObject *nb_type_put_unique_p(const std::type_info *cpp_type,
-                               const std::type_info *cpp_type_p,
+PyObject *nb_type_put_unique_p(const shim::type_info *cpp_type,
+                               const shim::type_info *cpp_type_p,
                                void *value,
                                cleanup_list *cleanup, bool cpp_delete) noexcept {
     rv_policy policy = cpp_delete ? rv_policy::take_ownership : rv_policy::none;
@@ -2061,7 +2061,7 @@ void nb_type_restore_ownership(PyObject *o, bool cpp_delete) noexcept {
     }
 }
 
-bool nb_type_isinstance(PyObject *o, const std::type_info *t) noexcept {
+bool nb_type_isinstance(PyObject *o, const shim::type_info *t) noexcept {
     type_data *d = nb_type_c2p(internals, t);
     if (d)
         return PyType_IsSubtype(Py_TYPE(o), d->type_py);
@@ -2069,7 +2069,7 @@ bool nb_type_isinstance(PyObject *o, const std::type_info *t) noexcept {
         return false;
 }
 
-PyObject *nb_type_lookup(const std::type_info *t) noexcept {
+PyObject *nb_type_lookup(const shim::type_info *t) noexcept {
     type_data *d = nb_type_c2p(internals, t);
     if (d)
         return (PyObject *) d->type_py;
@@ -2092,7 +2092,7 @@ size_t nb_type_align(PyObject *t) noexcept {
     return nb_type_data((PyTypeObject *) t)->align;
 }
 
-const std::type_info *nb_type_info(PyObject *t) noexcept {
+const shim::type_info *nb_type_info(PyObject *t) noexcept {
     return nb_type_data((PyTypeObject *) t)->type;
 }
 

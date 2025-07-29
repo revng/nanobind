@@ -283,28 +283,28 @@ struct type_init_data;
 NB_CORE PyObject *nb_type_new(const type_init_data *c) noexcept;
 
 /// Extract a pointer to a C++ type underlying a Python object, if possible
-NB_CORE bool nb_type_get(const std::type_info *t, PyObject *o, uint8_t flags,
+NB_CORE bool nb_type_get(const shim::type_info *t, PyObject *o, uint8_t flags,
                          cleanup_list *cleanup, void **out) noexcept;
 
 /// Cast a C++ type instance into a Python object
-NB_CORE PyObject *nb_type_put(const std::type_info *cpp_type, void *value,
+NB_CORE PyObject *nb_type_put(const shim::type_info *cpp_type, void *value,
                               rv_policy rvp, cleanup_list *cleanup,
                               bool *is_new = nullptr) noexcept;
 
 // Special version of nb_type_put for polymorphic classes
-NB_CORE PyObject *nb_type_put_p(const std::type_info *cpp_type,
-                                const std::type_info *cpp_type_p, void *value,
+NB_CORE PyObject *nb_type_put_p(const shim::type_info *cpp_type,
+                                const shim::type_info *cpp_type_p, void *value,
                                 rv_policy rvp, cleanup_list *cleanup,
                                 bool *is_new = nullptr) noexcept;
 
 // Special version of 'nb_type_put' for unique pointers and ownership transfer
-NB_CORE PyObject *nb_type_put_unique(const std::type_info *cpp_type,
+NB_CORE PyObject *nb_type_put_unique(const shim::type_info *cpp_type,
                                      void *value, cleanup_list *cleanup,
                                      bool cpp_delete) noexcept;
 
 // Special version of 'nb_type_put_unique' for polymorphic classes
-NB_CORE PyObject *nb_type_put_unique_p(const std::type_info *cpp_type,
-                                       const std::type_info *cpp_type_p,
+NB_CORE PyObject *nb_type_put_unique_p(const shim::type_info *cpp_type,
+                                       const shim::type_info *cpp_type_p,
                                        void *value, cleanup_list *cleanup,
                                        bool cpp_delete) noexcept;
 
@@ -335,16 +335,16 @@ NB_CORE PyObject *nb_type_name(PyObject *t) noexcept;
 NB_CORE PyObject *nb_inst_name(PyObject *o) noexcept;
 
 /// Return the C++ type_info wrapped by the given nanobind type object
-NB_CORE const std::type_info *nb_type_info(PyObject *t) noexcept;
+NB_CORE const shim::type_info *nb_type_info(PyObject *t) noexcept;
 
 /// Get a pointer to the instance data of a nanobind instance (nb_inst)
 NB_CORE void *nb_inst_ptr(PyObject *o) noexcept;
 
 /// Check if a Python type object wraps an instance of a specific C++ type
-NB_CORE bool nb_type_isinstance(PyObject *obj, const std::type_info *t) noexcept;
+NB_CORE bool nb_type_isinstance(PyObject *obj, const shim::type_info *t) noexcept;
 
 /// Search for the Python type object associated with a C++ type
-NB_CORE PyObject *nb_type_lookup(const std::type_info *t) noexcept;
+NB_CORE PyObject *nb_type_lookup(const shim::type_info *t) noexcept;
 
 /// Allocate an instance of type 't'
 NB_CORE PyObject *nb_inst_alloc(PyTypeObject *t);
@@ -398,7 +398,7 @@ NB_CORE void property_install_static(PyObject *scope, const char *name,
 
 // ========================================================================
 
-NB_CORE PyObject *get_override(void *ptr, const std::type_info *type,
+NB_CORE PyObject *get_override(void *ptr, const shim::type_info *type,
                                const char *name, bool pure);
 
 // ========================================================================
@@ -414,14 +414,14 @@ NB_CORE void keep_alive(PyObject *nurse, void *payload,
 // ========================================================================
 
 /// Indicate to nanobind that an implicit constructor can convert 'src' -> 'dst'
-NB_CORE void implicitly_convertible(const std::type_info *src,
-                                    const std::type_info *dst) noexcept;
+NB_CORE void implicitly_convertible(const shim::type_info *src,
+                                    const shim::type_info *dst) noexcept;
 
 /// Register a callback to check if implicit conversion to 'dst' is possible
 NB_CORE void implicitly_convertible(bool (*predicate)(PyTypeObject *,
                                                       PyObject *,
                                                       cleanup_list *),
-                                    const std::type_info *dst) noexcept;
+                                    const shim::type_info *dst) noexcept;
 
 // ========================================================================
 
@@ -435,11 +435,11 @@ NB_CORE void enum_append(PyObject *tp, const char *name,
                          int64_t value, const char *doc) noexcept;
 
 // Query an enumeration's Python object -> integer value map
-NB_CORE bool enum_from_python(const std::type_info *, PyObject *, int64_t *,
+NB_CORE bool enum_from_python(const shim::type_info *, PyObject *, int64_t *,
                               uint8_t flags) noexcept;
 
 // Query an enumeration's integer value -> Python object map
-NB_CORE PyObject *enum_from_cpp(const std::type_info *, int64_t) noexcept;
+NB_CORE PyObject *enum_from_cpp(const shim::type_info *, int64_t) noexcept;
 
 /// Export enum entries to the parent scope
 NB_CORE void enum_export(PyObject *tp);

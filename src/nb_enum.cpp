@@ -17,7 +17,7 @@ struct int64_hash {
 using enum_map = tsl::robin_map<int64_t, int64_t, int64_hash>;
 
 PyObject *enum_create(enum_init_data *ed) noexcept {
-    // Update hash table that maps from std::type_info to Python type
+    // Update hash table that maps from shim::type_info to Python type
     nb_internals *internals_ = internals;
     bool success;
     nb_type_map_slow::iterator it;
@@ -184,7 +184,7 @@ void enum_append(PyObject *tp_, const char *name_, int64_t value_,
     rev->emplace((int64_t) (uintptr_t) el.ptr(), value_);
 }
 
-bool enum_from_python(const std::type_info *tp, PyObject *o, int64_t *out, uint8_t flags) noexcept {
+bool enum_from_python(const shim::type_info *tp, PyObject *o, int64_t *out, uint8_t flags) noexcept {
     type_data *t = nb_type_c2p(internals, tp);
     if (!t)
         return false;
@@ -254,7 +254,7 @@ bool enum_from_python(const std::type_info *tp, PyObject *o, int64_t *out, uint8
     return false;
 }
 
-PyObject *enum_from_cpp(const std::type_info *tp, int64_t key) noexcept {
+PyObject *enum_from_cpp(const shim::type_info *tp, int64_t key) noexcept {
     type_data *t = nb_type_c2p(internals, tp);
     if (!t)
         return nullptr;

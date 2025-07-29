@@ -667,7 +667,7 @@ public:
 
 /// Retrieve the Python type object associated with a C++ class
 template <typename T> handle type() noexcept {
-    return detail::nb_type_lookup(&typeid(detail::intrinsic_t<T>));
+    return detail::nb_type_lookup(&typeidShim<detail::intrinsic_t<T>>());
 }
 
 template <typename T>
@@ -675,7 +675,7 @@ NB_INLINE bool isinstance(handle h) noexcept {
     if constexpr (std::is_base_of_v<handle, T>)
         return T::check_(h);
     else if constexpr (detail::is_base_caster_v<detail::make_caster<T>>)
-        return detail::nb_type_isinstance(h.ptr(), &typeid(detail::intrinsic_t<T>));
+        return detail::nb_type_isinstance(h.ptr(), &typeidShim<detail::intrinsic_t<T>>());
     else
         return detail::make_caster<T>().from_python(h, 0, nullptr);
 }

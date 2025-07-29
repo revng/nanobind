@@ -157,7 +157,7 @@ struct nb_inst_seq {
 
 // Linked list of type aliases when there are multiple shared libraries with duplicate RTTI data
 struct nb_alias_chain {
-    const std::type_info *value;
+    const shim::type_info *value;
     nb_alias_chain *next;
 };
 
@@ -169,20 +169,20 @@ struct nb_weakref_seq {
 };
 
 struct std_typeinfo_hash {
-    size_t operator()(const std::type_info *a) const {
+    size_t operator()(const shim::type_info *a) const {
         const char *name = a->name();
         return std::hash<std::string_view>()({name, strlen(name)});
     }
 };
 
 struct std_typeinfo_eq {
-    bool operator()(const std::type_info *a, const std::type_info *b) const {
+    bool operator()(const shim::type_info *a, const shim::type_info *b) const {
         return a->name() == b->name() || strcmp(a->name(), b->name()) == 0;
     }
 };
 
-using nb_type_map_fast = tsl::robin_map<const std::type_info *, type_data *, ptr_hash>;
-using nb_type_map_slow = tsl::robin_map<const std::type_info *, type_data *,
+using nb_type_map_fast = tsl::robin_map<const shim::type_info *, type_data *, ptr_hash>;
+using nb_type_map_slow = tsl::robin_map<const shim::type_info *, type_data *,
                                         std_typeinfo_hash, std_typeinfo_eq>;
 
 /// A simple pointer-to-pointer map that is reused a few times below (even if
@@ -311,14 +311,14 @@ struct nb_maybe_atomic {
  *   reference_internal return value policy). This data structure is
  *   potentially hot and shares the sharding scheme of `inst_c2p`.
  *
- * - `type_c2p_slow`: This is the ground-truth source of the `std::type_info`
+ * - `type_c2p_slow`: This is the ground-truth source of the `shim::type_info`
  *   to `type_info *` mapping. Unrelated to free-threading, lookups into this
  *   data struture are generally costly because they use a string comparison on
  *   some platforms. Because it is only used as a fallback for 'type_c2p_fast',
  *   protecting this member via the global `mutex` is sufficient.
  *
  * - `type_c2p_fast`: this data structure is *hot* and mostly read. It maps
- *   `std::type_info` to `type_info *` but uses pointer-based comparisons.
+ *   `shim::type_info` to `type_info *` but uses pointer-based comparisons.
  *   The implementation depends on the Python build.
  *
  * - `translators`: This is an append-to-front-only singly linked list traversed
@@ -376,7 +376,7 @@ struct nb_internals {
 #endif
 
 #if !defined(NB_FREE_THREADED)
-    /// C++ -> Python type map -- fast version based on std::type_info pointer equality
+    /// C++ -> Python type map -- fast version based on shim::type_info pointer equality
     nb_type_map_fast type_c2p_fast;
 #endif
 
@@ -430,14 +430,14 @@ struct nb_internals {
 extern nb_internals *internals;
 extern PyTypeObject *nb_meta_cache;
 
-extern char *type_name(const std::type_info *t);
+extern char *type_name(const shim::type_info *t);
 
 // Forward declarations
 extern PyObject *inst_new_ext(PyTypeObject *tp, void *value);
 extern PyObject *inst_new_int(PyTypeObject *tp, PyObject *args, PyObject *kwds);
 extern PyTypeObject *nb_static_property_tp() noexcept;
 extern type_data *nb_type_c2p(nb_internals *internals,
-                              const std::type_info *type);
+                              const shim::type_info *type);
 extern void nb_type_unregister(type_data *t) noexcept;
 
 extern PyObject *call_one_arg(PyObject *fn, PyObject *arg) noexcept;

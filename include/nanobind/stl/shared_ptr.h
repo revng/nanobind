@@ -102,7 +102,7 @@ template <typename T> struct type_caster<std::shared_ptr<T>> {
         handle result;
 
         Td *ptr = (Td *) value.get();
-        const std::type_info *type = &typeid(Td);
+        const shim::type_info *type = &typeidShim<Td>();
 
         constexpr bool has_type_hook =
             !std::is_base_of_v<std::false_type, type_hook<Td>>;
@@ -113,8 +113,8 @@ template <typename T> struct type_caster<std::shared_ptr<T>> {
             result = nb_type_put(type, ptr, rv_policy::reference,
                                  cleanup, &is_new);
         } else {
-            const std::type_info *type_p =
-                (!has_type_hook && ptr) ? &typeid(*ptr) : nullptr;
+            const shim::type_info *type_p =
+                (!has_type_hook && ptr) ? &typeidShim(*ptr) : nullptr;
 
             result = nb_type_put_p(type, type_p, ptr, rv_policy::reference,
                                    cleanup, &is_new);

@@ -118,7 +118,7 @@ struct type_caster<std::unique_ptr<T, Deleter>> {
             cpp_delete = value.get_deleter().owned_by_cpp();
 
         Td *ptr = (Td *) value.get();
-        const std::type_info *type = &typeid(Td);
+        const shim::type_info *type = &typeidShim<Td>();
         if (!ptr)
             return none().release();
 
@@ -131,8 +131,8 @@ struct type_caster<std::unique_ptr<T, Deleter>> {
         if constexpr (!std::is_polymorphic_v<Td>) {
             result = nb_type_put_unique(type, ptr, cleanup, cpp_delete);
         } else {
-            const std::type_info *type_p =
-                (!has_type_hook && ptr) ? &typeid(*ptr) : nullptr;
+            const shim::type_info *type_p =
+                (!has_type_hook && ptr) ? &typeidShim(*ptr) : nullptr;
 
             result = nb_type_put_unique_p(type, type_p, ptr, cleanup, cpp_delete);
         }

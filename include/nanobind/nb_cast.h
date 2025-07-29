@@ -191,13 +191,13 @@ template <typename T>
 struct type_caster<T, enable_if_t<std::is_enum_v<T>>> {
     NB_INLINE bool from_python(handle src, uint8_t flags, cleanup_list *) noexcept {
         int64_t result;
-        bool rv = enum_from_python(&typeid(T), src.ptr(), &result, flags);
+        bool rv = enum_from_python(&typeidShim<T>(), src.ptr(), &result, flags);
         value = (T) result;
         return rv;
     }
 
     NB_INLINE static handle from_cpp(T src, rv_policy, cleanup_list *) noexcept {
-        return enum_from_cpp(&typeid(T), (int64_t) src);
+        return enum_from_cpp(&typeidShim<T>(), (int64_t) src);
     }
 
     NB_TYPE_CASTER(T, const_name<T>())
@@ -478,7 +478,7 @@ template <typename Type_> struct type_caster_base : type_caster_base_tag {
 
     NB_INLINE bool from_python(handle src, uint8_t flags,
                                cleanup_list *cleanup) noexcept {
-        return nb_type_get(&typeid(Type), src.ptr(), flags, cleanup,
+        return nb_type_get(&typeidShim<Type>(), src.ptr(), flags, cleanup,
                            (void **) &value);
     }
 
@@ -492,7 +492,7 @@ template <typename Type_> struct type_caster_base : type_caster_base_tag {
             ptr = (Type *) &value;
 
         policy = infer_policy<T>(policy);
-        const std::type_info *type = &typeid(Type);
+        const shim::type_info *type = &typeidShim<Type>();
 
         constexpr bool has_type_hook =
             !std::is_base_of_v<std::false_type, type_hook<Type>>;
@@ -502,8 +502,8 @@ template <typename Type_> struct type_caster_base : type_caster_base_tag {
         if constexpr (!std::is_polymorphic_v<Type>) {
             return nb_type_put(type, ptr, policy, cleanup);
         } else {
-            const std::type_info *type_p =
-                (!has_type_hook && ptr) ? &typeid(*ptr) : nullptr;
+            const shim::type_info *type_p =
+                (!has_type_hook && ptr) ? &typeidShim(*ptr) : nullptr;
             return nb_type_put_p(type, type_p, ptr, policy, cleanup);
         }
     }
