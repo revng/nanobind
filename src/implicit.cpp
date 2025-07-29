@@ -13,8 +13,8 @@
 NAMESPACE_BEGIN(NB_NAMESPACE)
 NAMESPACE_BEGIN(detail)
 
-void implicitly_convertible(const std::type_info *src,
-                            const std::type_info *dst) noexcept {
+void implicitly_convertible(const shim::type_info *src,
+                            const shim::type_info *dst) noexcept {
     nb_internals *internals_ = internals;
     type_data *t = nb_type_c2p(internals_, dst);
     check(t, "nanobind::detail::implicitly_convertible(src=%s, dst=%s): "
@@ -44,7 +44,7 @@ void implicitly_convertible(const std::type_info *src,
 
 void implicitly_convertible(bool (*predicate)(PyTypeObject *, PyObject *,
                                               cleanup_list *),
-                            const std::type_info *dst) noexcept {
+                            const shim::type_info *dst) noexcept {
     nb_internals *internals_ = internals;
     type_data *t = nb_type_c2p(internals_, dst);
     check(t, "nanobind::detail::implicitly_convertible(src=<predicate>, dst=%s): "

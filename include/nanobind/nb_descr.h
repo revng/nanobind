@@ -27,9 +27,9 @@ struct descr {
     constexpr size_t type_count() const { return sizeof...(Ts); }
     constexpr size_t size() const { return N; }
 
-    NB_INLINE void put_types(const std::type_info **out) const {
+    NB_INLINE void put_types(const shim::type_info **out) const {
         size_t ctr = 0;
-        ((out[ctr++] = &typeid(Ts)), ...);
+        ((out[ctr++] = &typeidShim<Ts>()), ...);
         out[ctr++] = nullptr;
     }
 };

@@ -235,7 +235,7 @@ struct func_data_prelim_base {
     const char *descr;
 
     /// C++ types referenced by 'descr'
-    const std::type_info **descr_types;
+    const shim::type_info **descr_types;
 
     /// Supplementary flags
     uint32_t flags;

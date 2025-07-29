@@ -96,7 +96,7 @@ struct nb_alias_chain;
 
 // Implicit conversions for C++ type bindings, used in type_data below
 struct implicit_t {
-    const std::type_info **cpp;
+    const shim::type_info **cpp;
     bool (**py)(PyTypeObject *, PyObject *, cleanup_list *) noexcept;
 };
 
@@ -112,7 +112,7 @@ struct type_data {
     uint32_t align : 8;
     uint32_t flags : 24;
     const char *name;
-    const std::type_info *type;
+    const shim::type_info *type;
     PyTypeObject *type_py;
     nb_alias_chain *alias_chain;
 #if defined(Py_LIMITED_API)
@@ -135,7 +135,7 @@ struct type_data {
 /// Information about a type that is only relevant when it is being created
 struct type_init_data : type_data {
     PyObject *scope;
-    const std::type_info *base;
+    const shim::type_info *base;
     PyTypeObject *base_py;
     const char *doc;
     const PyType_Slot *type_slots;
@@ -210,7 +210,7 @@ enum class enum_flags : uint32_t {
 };
 
 struct enum_init_data {
-    const std::type_info *type;
+    const shim::type_info *type;
     PyObject *scope;
     const char *name;
     const char *docstr;
@@ -289,7 +289,7 @@ NAMESPACE_END(detail)
 inline bool type_check(handle h) { return detail::nb_type_check(h.ptr()); }
 inline size_t type_size(handle h) { return detail::nb_type_size(h.ptr()); }
 inline size_t type_align(handle h) { return detail::nb_type_align(h.ptr()); }
-inline const std::type_info& type_info(handle h) { return *detail::nb_type_info(h.ptr()); }
+inline const shim::type_info& type_info(handle h) { return *detail::nb_type_info(h.ptr()); }
 template <typename T>
 inline T &type_supplement(handle h) { return *(T *) detail::nb_type_supplement(h.ptr()); }
 inline str type_name(handle h) { return steal<str>(detail::nb_type_name(h.ptr())); }
@@ -401,7 +401,7 @@ private:
                     return Caster().from_python(
                         src, detail::cast_flags::convert, cleanup);
                 },
-                &typeid(Type));
+                &typeidShim<Type>());
         }
     }
 };
@@ -564,10 +564,10 @@ public:
         d.size = (uint32_t) sizeof(Alias);
         d.name = name;
         d.scope = scope.ptr();
-        d.type = &typeid(T);
+        d.type = &typeidShim<T>();
 
         if constexpr (!std::is_same_v<Base, T>) {
-            d.base = &typeid(Base);
+            d.base = &typeidShim<Base>();
             d.flags |= (uint32_t) detail::type_init_flags::has_base;
         }
 
@@ -776,7 +776,7 @@ public:
     template <typename... Extra>
     NB_INLINE enum_(handle scope, const char *name, const Extra &... extra) {
         detail::enum_init_data ed { };
-        ed.type = &typeid(T);
+        ed.type = &typeidShim<T>();
         ed.scope = scope.ptr();
         ed.name = name;
         ed.flags = std::is_signed_v<Underlying>
@@ -847,7 +847,7 @@ template <typename Source, typename Target> void implicitly_convertible() {
             "unless it is opaque.");
 
         if constexpr (detail::is_base_caster_v<Caster>) {
-            detail::implicitly_convertible(&typeid(Source), &typeid(Target));
+            detail::implicitly_convertible(&typeidShim<Source>(), &typeidShim<Target>());
         } else {
             detail::implicitly_convertible(
                 [](PyTypeObject *, PyObject *src,
@@ -855,7 +855,7 @@ template <typename Source, typename Target> void implicitly_convertible() {
                     return Caster().from_python(src, detail::cast_flags::convert,
                                                 cleanup);
                 },
-                &typeid(Target));
+                &typeidShim<Target>());
         }
     }
 }

@@ -14,7 +14,7 @@ public:
     type_info(const char *prettyName) : prettyName(prettyName){};
 
     /// Return the stringified name of the type. This should be similar enough
-    /// with what std::type_info does.
+    /// with what shim::type_info does.
     const char *name() const { return prettyName; };
 
     bool operator==(const shim::type_info &Other) const {
@@ -66,7 +66,7 @@ private:
         assert(EndPos > StartPos);
 
         // Extract the substring and save it in static storage, this is needed
-        // because std::type_info returns a `const char *` for `name`
+        // because shim::type_info returns a `const char *` for `name`
         static std::string Name = UglyName.substr(StartPos, EndPos - StartPos);
         return Name.c_str();
     }
@@ -77,7 +77,7 @@ public:
 
 template<typename T>
 shim::type_info &typeidShim() {
-    // Return a std::type_info-like object. This will always be the same object
+    // Return a shim::type_info-like object. This will always be the same object
     // given the same type. This works be leveraging WEAK library symbols. It
     // will not work in some cases (e.g. `dlopen(..., RTLD_LOCAL)`)
     return TypeStorage<T>::ID;
