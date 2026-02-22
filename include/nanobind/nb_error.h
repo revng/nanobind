@@ -104,7 +104,7 @@ public:
     NB_EXPORT_SHARED builtin_exception(const builtin_exception &) = default;
     NB_EXPORT_SHARED ~builtin_exception();
     NB_EXPORT_SHARED exception_type type() const { return m_type; }
-    virtual const char *what() const override { return m_what.c_str(); }
+    virtual const char *what() const noexcept override { return m_what.c_str(); }
 private:
     exception_type m_type;
     std::string m_what;
