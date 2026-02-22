@@ -24,8 +24,9 @@ target_compile_definitions(nanobind PUBLIC -DNB_SHARED)
 add_custom_target(build-nanobind ALL DEPENDS nanobind)
 install(TARGETS nanobind LIBRARY)
 
-file(RELATIVE_PATH PYTHON_INSTALL_PATH "${CMAKE_INSTALL_PREFIX}"
-     "${Python_SITELIB}")
+cmake_path(GET Python_EXECUTABLE PARENT_PATH PYTHON_BIN_DIR)
+cmake_path(GET PYTHON_BIN_DIR PARENT_PATH PYTHON_ROOT)
+cmake_path(RELATIVE_PATH Python_SITELIB BASE_DIRECTORY "${PYTHON_ROOT}" OUTPUT_VARIABLE PYTHON_INSTALL_PATH)
 
 file(GLOB PYTHON_FILES "${CMAKE_CURRENT_SOURCE_DIR}/../src/*.py")
 install(
